@@ -1,2 +1,4 @@
 module RmSdk
 singleton Transforms 1.0 Transforms.qml
+singleton Inspector 1.0 Inspector.qml
+singleton Logging 1.0 Logging.qml

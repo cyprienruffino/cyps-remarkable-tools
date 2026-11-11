@@ -67,6 +67,11 @@ types. It's built with `nix build .#rm-sdk-extension` and installed with
 - `import RmSdk`, `Transforms.identity()` and `Transforms.fromValues(m11, m12,
   m21, m22, dx, dy)`: QTransform values, which QML can't create, for xochitl
   types that need them.
+- `Inspector.describe(object)`: any object's classes, typed properties, and
+  method and signal signatures, from Qt's metadata, to see how xochitl's own
+  types work.
+- `Logging.setFilterRules(rules)`: switches logging categories while xochitl
+  runs, e.g. `"rm.peninput.debug=true"` to see xochitl's own debug messages.
 
 Extensions are compiled with the cross compiler against the host Qt's headers,
 which match the tablet's Qt version (6.10); their Qt symbols resolve against

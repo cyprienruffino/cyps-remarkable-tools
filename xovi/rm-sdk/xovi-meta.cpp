@@ -9,8 +9,8 @@ extern "C" {
 __attribute__((section(".xovi"))) const char *LINKTABLENAMES = "\0";
 __attribute__((section(".xovi"))) const void *LINKTABLEVALUES[] = { (void *) 0 };
 __attribute__((section(".xovi"))) const struct XoViEnvironment *Environment = 0;
-// 0.2.0, as (major << 16) | (minor << 8) | patch
-__attribute__((section(".xovi"))) int EXTENSIONVERSION = 0x000200;
+// 0.3.0, as (major << 16) | (minor << 8) | patch
+__attribute__((section(".xovi"))) int EXTENSIONVERSION = 0x000300;
 
 __attribute__((section(".xovi_info"))) const char __XOVIMETADATANAMES[] = "";
 __attribute__((section(".xovi"))) const struct XoviMetadataEntry **METADATAVALUES[] = {
