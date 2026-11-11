@@ -57,6 +57,28 @@ QT_QPA_PLATFORM=offscreen appload-run --tap 477,890 --screenshot shot.png dist-p
 To use it from a project's own flake, take
 `inputs.remarkable-sdk.devShells.${system}.default`.
 
+## Native ink
+
+`templates/appload/ui/NativeInk.qml` lets apps write with the pen as fast as
+in a notebook, using xochitl's own pen pipeline (`PenInputSurface` and
+`ScenePenInputHandler`, which AppLoad apps can create). It needs the rm-sdk
+extension, and falls back to drawing with the mouse elsewhere, e.g. in
+`appload-run`.
+
+xochitl draws the ink live but doesn't give the strokes to apps, so the app's
+backend records them from the digitizer with `templates/appload/backend/pen_strokes.h`
+and passes them to `NativeInk.addScreenStroke()`, which keeps and draws them;
+the eraser end erases the ink it passes over. See Dice & Life's notes page for
+a complete example.
+
+What it took, for the curious: xochitl's pen manager only routes the pen to
+input surfaces on its main window item (the one with a `penInput` property),
+so `NativeInk` puts its surface there, over itself, instead of inside AppLoad's
+window, where the manager finds no area to draw in and hands the pen to the UI
+as a mouse. The surface and handler also need `setTransform()` with real
+`QTransform`s, which is why the extension exists. `Logging.setFilterRules()`
+with `rm.peninput`, `rm.digitizer` and `rm.stroke` shows the whole pipeline.
+
 ## The rm-sdk xovi extension
 
 `xovi/rm-sdk` is a small [xovi](https://github.com/asivery/xovi) extension
