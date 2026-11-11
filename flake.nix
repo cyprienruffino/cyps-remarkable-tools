@@ -17,7 +17,7 @@
         # symbols resolve against the Qt xochitl has loaded.
         rm-sdk-extension = pkgs.pkgsCross.aarch64-multiplatform.stdenv.mkDerivation {
           pname = "rm-sdk-extension";
-          version = "0.1.0";
+          version = "0.2.0";
           src = ./xovi/rm-sdk;
           # Don't embed Nix store library paths
           NIX_DONT_SET_RPATH_aarch64_unknown_linux_gnu = 1;
@@ -32,9 +32,20 @@
               ]);
             in
             ''
-              ${qtbase}/libexec/moc transforms.h -o moc_transforms.cpp
+              for header in *.h; do
+                ${qtbase}/libexec/moc "$header" -o "moc_''${header%.h}.cpp"
+              done
               $CXX -std=c++17 -O2 -fPIC -shared -DQT_NO_DEBUG ${includes} \
-                -o rm-sdk.so main.cpp moc_transforms.cpp xovi-meta.cpp
+                -o rm-sdk.so main.cpp moc_*.cpp xovi-meta.cpp
+
+              # Qt symbols are left undefined on purpose, but undefined symbols
+              # of our own classes (e.g. from a header moc didn't process) would
+              # only fail when xochitl loads the extension, crashing it. Done
+              # here, since check phases don't run when cross-compiling.
+              if $NM -D -C --undefined-only rm-sdk.so | grep -E "vtable for [A-PR-Za-z][A-Za-z0-9_]*$| [A-PR-Za-z][A-Za-z0-9_]*::staticMetaObject$"; then
+                echo "Undefined symbols of the extension's own classes" >&2
+                exit 1
+              fi
             '';
           installPhase = "install -Dm644 rm-sdk.so $out/rm-sdk.so";
         };
