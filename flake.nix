@@ -27,6 +27,13 @@
           # Paths in the ssh commands are expanded locally on purpose
           excludeShellChecks = [ "SC2029" ];
         };
+        rm-screenshot = pkgs.writeShellApplication {
+          name = "rm-screenshot";
+          runtimeInputs = [ pkgs.openssh ];
+          text = builtins.readFile ./scripts/rm-screenshot.sh;
+          # The remote script is quoted for the tablet's shell on purpose
+          excludeShellChecks = [ "SC2016" "SC2029" ];
+        };
         rm-logs = pkgs.writeShellApplication {
           name = "rm-logs";
           runtimeInputs = [ pkgs.openssh ];
@@ -59,6 +66,7 @@
               self.packages.${pkgs.stdenv.hostPlatform.system}.appload-run
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-deploy
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-logs
+              self.packages.${pkgs.stdenv.hostPlatform.system}.rm-screenshot
             ];
 
             RM_TOOLCHAIN_FILE = "${self}/cmake/aarch64-remarkable.cmake";

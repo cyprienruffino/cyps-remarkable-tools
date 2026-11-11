@@ -22,7 +22,7 @@ It provides:
 - `rcc`, `qml` and `qmltestrunner` (Qt 6), to pack, preview and test AppLoad
   QML frontends on a PC.
 - `cmake`, `ninja`, `pkg-config` and `python3`.
-- `appload-run`, `rm-deploy` and `rm-logs`, below.
+- `appload-run`, `rm-deploy`, `rm-logs` and `rm-screenshot`, below.
 
 ## Starting an app
 
@@ -60,6 +60,10 @@ Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
   It works while the app's backend is running.
 - `rm-logs [pattern]` follows xochitl's logs, where AppLoad and its apps log,
   optionally filtered.
+- `rm-screenshot [output.png]` takes a screenshot of the tablet and copies it
+  here. It needs the [rm-shot](https://github.com/rmitchellscott/rm-shot) xovi
+  extension, and refuses to run until xochitl has been up for 30s: rm-shot
+  crashes xochitl when asked for a screenshot while it's starting.
 
 They're also available without the dev shell:
 
