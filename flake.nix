@@ -12,6 +12,33 @@
     in
     {
       packages = forAllSystems (pkgs: rec {
+        # rm-sdk, a xovi extension adding helpers to xochitl's QML. Built against
+        # the host's Qt headers, which match the tablet's Qt version; its Qt
+        # symbols resolve against the Qt xochitl has loaded.
+        rm-sdk-extension = pkgs.pkgsCross.aarch64-multiplatform.stdenv.mkDerivation {
+          pname = "rm-sdk-extension";
+          version = "0.1.0";
+          src = ./xovi/rm-sdk;
+          # Don't embed Nix store library paths
+          NIX_DONT_SET_RPATH_aarch64_unknown_linux_gnu = 1;
+          NIX_NO_SELF_RPATH = 1;
+          buildPhase =
+            let
+              qtbase = pkgs.qt6.qtbase;
+              qtdeclarative = pkgs.qt6.qtdeclarative;
+              includes = builtins.concatStringsSep " " (map (dir: "-I${dir}") [
+                "${qtbase}/include" "${qtbase}/include/QtCore" "${qtbase}/include/QtGui"
+                "${qtdeclarative}/include" "${qtdeclarative}/include/QtQml"
+              ]);
+            in
+            ''
+              ${qtbase}/libexec/moc transforms.h -o moc_transforms.cpp
+              $CXX -std=c++17 -O2 -fPIC -shared -DQT_NO_DEBUG ${includes} \
+                -o rm-sdk.so main.cpp moc_transforms.cpp xovi-meta.cpp
+            '';
+          installPhase = "install -Dm644 rm-sdk.so $out/rm-sdk.so";
+        };
+
         # The device side of rm-input, static so it doesn't depend on the tablet's libraries
         rm-input-device = pkgs.pkgsCross.aarch64-multiplatform.stdenv.mkDerivation {
           pname = "rm-input-device";
@@ -20,6 +47,13 @@
           buildInputs = [ pkgs.pkgsCross.aarch64-multiplatform.glibc.static ];
           buildPhase = "$CC -O2 -static -Wall -o rm-input rm-input.c";
           installPhase = "install -Dm755 rm-input $out/bin/rm-input";
+        };
+        rm-deploy-extension = pkgs.writeShellApplication {
+          name = "rm-deploy-extension";
+          runtimeInputs = [ pkgs.openssh pkgs.coreutils ];
+          text = builtins.readFile ./scripts/rm-deploy-extension.sh;
+          # The remote scripts are quoted for the tablet's shell on purpose
+          excludeShellChecks = [ "SC2016" "SC2029" ];
         };
         rm-input = pkgs.writeShellApplication {
           name = "rm-input";
@@ -83,6 +117,7 @@
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-logs
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-screenshot
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-input
+              self.packages.${pkgs.stdenv.hostPlatform.system}.rm-deploy-extension
             ];
 
             RM_TOOLCHAIN_FILE = "${self}/cmake/aarch64-remarkable.cmake";

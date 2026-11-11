@@ -57,6 +57,24 @@ QT_QPA_PLATFORM=offscreen appload-run --tap 477,890 --screenshot shot.png dist-p
 To use it from a project's own flake, take
 `inputs.remarkable-sdk.devShells.${system}.default`.
 
+## The rm-sdk xovi extension
+
+`xovi/rm-sdk` is a small [xovi](https://github.com/asivery/xovi) extension
+adding helpers to xochitl's QML, for AppLoad apps to use with xochitl's own
+types. It's built with `nix build .#rm-sdk-extension` and installed with
+`rm-deploy-extension result/rm-sdk.so`. It provides:
+
+- `import RmSdk`, `Transforms.identity()` and `Transforms.fromValues(m11, m12,
+  m21, m22, dx, dy)`: QTransform values, which QML can't create, for xochitl
+  types that need them.
+
+Extensions are compiled with the cross compiler against the host Qt's headers,
+which match the tablet's Qt version (6.10); their Qt symbols resolve against
+the Qt xochitl has loaded, so they don't link to it. The `.xovi` metadata
+xovi expects is written by hand in `xovi-meta.cpp`.
+
+`appload-run` has a stand-in for `RmSdk`, so apps using it still load on a PC.
+
 ## Tablet helpers
 
 Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
@@ -68,6 +86,10 @@ Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
   restarting it while an AppLoad app is open can crash it.
 - `rm-logs [pattern]` follows xochitl's logs, where AppLoad and its apps log,
   optionally filtered.
+- `rm-deploy-extension <extension.so>` installs a xovi extension and restarts
+  xochitl to load it. A broken extension crashes xochitl on every start, so it
+  refuses to run while an AppLoad app is open, checks that xochitl came back
+  with xovi, and removes the extension again if it didn't.
 - `rm-screenshot [output.png]` takes a screenshot of the tablet and copies it
   here. It needs the [rm-shot](https://github.com/rmitchellscott/rm-shot) xovi
   extension, and refuses to run until xochitl has been up for 30s: rm-shot
