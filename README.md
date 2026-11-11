@@ -80,9 +80,9 @@ xovi expects is written by hand in `xovi-meta.cpp`.
 Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
 
 - `rm-deploy [--restart] <app directory>` installs an AppLoad app directory
-  as `/home/root/xovi/exthome/appload/<directory name>`. It works while the
-  app is open, which then needs reopening; new apps show up after tapping
-  Reload in AppLoad's menu. It doesn't restart xochitl unless asked to:
+  as `/home/root/xovi/exthome/appload/<directory name>`. Tap Reload in
+  AppLoad's menu to load it: until then AppLoad keeps using the app's previous
+  frontend, even when reopening it. It doesn't restart xochitl unless asked to:
   restarting it while an AppLoad app is open can crash it.
 - `rm-logs [pattern]` follows xochitl's logs, where AppLoad and its apps log,
   optionally filtered.

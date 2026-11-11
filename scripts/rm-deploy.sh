@@ -3,9 +3,10 @@
 # The directory name is used as the application's directory on the tablet.
 # RM_HOST picks the ssh host (default: remarkable).
 #
-# xochitl doesn't need restarting: AppLoad loads an app's files each time it
-# opens, and its Reload button picks up new apps. Restarting xochitl while an
-# AppLoad app is open can crash it, so --restart is only for xovi extensions.
+# xochitl doesn't need restarting: tapping Reload in AppLoad's menu makes it
+# pick up new and updated apps (it keeps using an app's old frontend until
+# then). Restarting xochitl while an AppLoad app is open can crash it, so
+# --restart is only for xovi extensions.
 
 host="${RM_HOST:-remarkable}"
 restart=0
@@ -44,7 +45,7 @@ if [ "$restart" = 1 ]; then
     ssh "$host" systemctl restart xochitl
     echo "Restarted xochitl, give it 30s before taking screenshots"
 elif echo "$status" | grep -q running; then
-    echo "$app is open on the tablet: close and reopen it to use the new version"
-elif echo "$status" | grep -q new; then
-    echo "Tap Reload in AppLoad's menu to see it"
+    echo "$app is open on the tablet: close it, tap Reload in AppLoad's menu, and reopen it"
+else
+    echo "Tap Reload in AppLoad's menu to load it"
 fi
