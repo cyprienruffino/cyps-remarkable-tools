@@ -65,11 +65,16 @@ Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
   extension, and refuses to run until xochitl has been up for 30s: rm-shot
   crashes xochitl when asked for a screenshot while it's starting.
 - `rm-input tap X Y`, `rm-input swipe X1 Y1 X2 Y2 [ms]` and
-  `rm-input pen X1,Y1 X2,Y2 ...` simulate a finger or the pen, in screen
+  `rm-input pen X1,Y1 X2,Y2 ... [/ X1,Y1 ...]` (`/` lifting the pen between
+  strokes, for letters like P) simulate a finger or the pen, in screen
   pixels, by writing events to the touchscreen and digitizer, which xochitl
   handles like real ones. With `rm-screenshot`, that's enough to drive the
   tablet remotely, e.g. to open an app from AppLoad's menu and test it.
   Take a fresh screenshot before each tap: the screen may have changed.
+  Taps mirror what a real finger sends, which `rm-input record [touch|pen]`
+  prints for comparison. To close a fullscreen AppLoad app, swipe down from
+  the top center (`rm-input swipe 477 0 477 250`) and tap the X right away,
+  before AppLoad's title bar hides again.
 
 They're also available without the dev shell:
 

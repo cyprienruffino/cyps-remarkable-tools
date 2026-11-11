@@ -1,7 +1,7 @@
 # Simulates touches and pen strokes on the tablet, in screen pixels.
 #   rm-input tap X Y
 #   rm-input swipe X1 Y1 X2 Y2 [milliseconds]
-#   rm-input pen X1,Y1 X2,Y2 ...
+#   rm-input pen X1,Y1 X2,Y2 ... [/ X1,Y1 ...]
 # Copies the device-side tool to the tablet when it changed.
 # RM_HOST picks the ssh host (default: remarkable).
 
