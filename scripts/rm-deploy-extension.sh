@@ -41,9 +41,24 @@ up\ "$restarts")
     ssh "$host" "journalctl -u xochitl --since -60s --no-pager -o cat | grep -i '\[${name%.so}\]' | tail -n 5"
     ;;
 *)
-    echo "xochitl crashed with $name ($status), removing it" >&2
-    ssh "$host" "rm -f $remote && systemctl restart xochitl"
-    echo "Removed $name and restarted xochitl; if the tablet rebooted, start xovi again with /home/root/xovi/start" >&2
+    echo "xochitl crashed with $name (${status:-unreachable}), removing it" >&2
+    # Repeated crashes reboot the tablet, so keep trying while it comes back:
+    # left in place, the extension would crash xochitl again once xovi starts
+    for _ in $(seq 24); do
+        if ssh -o ConnectTimeout=5 "$host" "rm -f $remote" 2>/dev/null; then
+            echo "Removed $name" >&2
+            ssh "$host" '
+                if tr "\0" "\n" < /proc/$(pidof xochitl)/environ | grep -q "^LD_PRELOAD=.*xovi"; then
+                    systemctl restart xochitl
+                    echo "Restarted xochitl" >&2
+                else
+                    echo "The tablet rebooted: start xovi again with /home/root/xovi/start" >&2
+                fi'
+            exit 1
+        fi
+        sleep 5
+    done
+    echo "Couldn't reach the tablet to remove $remote: remove it before starting xovi again" >&2
     exit 1
     ;;
 esac
