@@ -11,7 +11,22 @@
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
     in
     {
-      packages = forAllSystems (pkgs: {
+      packages = forAllSystems (pkgs: rec {
+        # The device side of rm-input, static so it doesn't depend on the tablet's libraries
+        rm-input-device = pkgs.pkgsCross.aarch64-multiplatform.stdenv.mkDerivation {
+          pname = "rm-input-device";
+          version = "0.1.0";
+          src = ./rm-input;
+          buildInputs = [ pkgs.pkgsCross.aarch64-multiplatform.glibc.static ];
+          buildPhase = "$CC -O2 -static -Wall -o rm-input rm-input.c";
+          installPhase = "install -Dm755 rm-input $out/bin/rm-input";
+        };
+        rm-input = pkgs.writeShellApplication {
+          name = "rm-input";
+          runtimeInputs = [ pkgs.openssh pkgs.coreutils ];
+          text = builtins.replaceStrings [ "@rmInputDevice@" ] [ "${rm-input-device}" ] (builtins.readFile ./scripts/rm-input.sh);
+          excludeShellChecks = [ "SC2029" ];
+        };
         appload-run = pkgs.stdenv.mkDerivation {
           pname = "appload-run";
           version = "0.1.0";
@@ -67,6 +82,7 @@
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-deploy
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-logs
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-screenshot
+              self.packages.${pkgs.stdenv.hostPlatform.system}.rm-input
             ];
 
             RM_TOOLCHAIN_FILE = "${self}/cmake/aarch64-remarkable.cmake";
