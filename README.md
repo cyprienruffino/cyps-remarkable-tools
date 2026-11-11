@@ -38,7 +38,13 @@ creates an AppLoad app with a QML frontend and a C++ backend, see its README.
 `appload-run <app directory>` stands in for AppLoad: it provides the
 `net.asivery.AppLoad` QML module, starts the app's real backend over the same
 socket protocol, and shows the frontend at the Paper Pro Move's resolution
-(`--size pro` for the Paper Pro, or `WIDTHxHEIGHT`).
+(`--size pro` for the Paper Pro, or `WIDTHxHEIGHT`). Apps can use some of
+xochitl's own QML modules, which `appload-run` replaces with stand-ins that do
+nothing (see `appload-run/stubs`):
+
+- `xofm.libs.epaper`: `ScreenModeItem { mode: ScreenModeItem.Pen }` makes the
+  area it covers refresh with the fast, low latency waveform xochitl uses for
+  ink, e.g. over a drawing area.
 
 For testing, `--tap X,Y` clicks and `--stroke X1,Y1:X2,Y2:...` drags like a
 pen (both repeatable) before `--screenshot file.png` saves the window and quits; with `QT_QPA_PLATFORM=offscreen` it needs no

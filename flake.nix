@@ -21,6 +21,19 @@
           buildPhase = "$CC -O2 -static -Wall -o rm-input rm-input.c";
           installPhase = "install -Dm755 rm-input $out/bin/rm-input";
         };
+        # The AppLoad app used by rm-dump-qml
+        qml-dump-app = pkgs.runCommand "qml-dump-app" { nativeBuildInputs = [ pkgs.qt6.qtbase ]; } ''
+          mkdir -p $out
+          cp ${./tools/qml-dump/manifest.json} $out/manifest.json
+          cd ${./tools/qml-dump}
+          ${pkgs.qt6.qtbase}/libexec/rcc --binary -o $out/resources.rcc application.qrc
+        '';
+        rm-dump-qml = pkgs.writeShellApplication {
+          name = "rm-dump-qml";
+          runtimeInputs = [ pkgs.openssh pkgs.gnutar pkgs.coreutils pkgs.gnused ];
+          text = builtins.replaceStrings [ "@qmlDump@" ] [ "${qml-dump-app}" ] (builtins.readFile ./scripts/rm-dump-qml.sh);
+          excludeShellChecks = [ "SC2029" ];
+        };
         rm-input = pkgs.writeShellApplication {
           name = "rm-input";
           runtimeInputs = [ pkgs.openssh pkgs.coreutils ];
@@ -83,6 +96,7 @@
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-logs
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-screenshot
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-input
+              self.packages.${pkgs.stdenv.hostPlatform.system}.rm-dump-qml
             ];
 
             RM_TOOLCHAIN_FILE = "${self}/cmake/aarch64-remarkable.cmake";

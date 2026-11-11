@@ -274,6 +274,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<AppLoadEndpoint>("net.asivery.AppLoad", 1, 0, "AppLoad");
 
     QQmlApplicationEngine engine;
+    // Stand-ins for xochitl's own QML modules, installed next to the binary
+    engine.addImportPath(QCoreApplication::applicationDirPath() + "/../share/appload-run/stubs");
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [] { Backend::instance()->terminate(); });
 
     // Like AppLoad's window: the application's root item fills it, and gets

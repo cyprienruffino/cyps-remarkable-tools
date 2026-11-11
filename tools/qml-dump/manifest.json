@@ -1,0 +1,8 @@
+{
+    "id": "xochitl-qml-dump",
+    "name": "QML dump",
+    "entry": "/ui/main.qml",
+    "loadsBackend": false,
+    "canHaveMultipleFrontends": false,
+    "supportsScaling": true
+}
