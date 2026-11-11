@@ -27,7 +27,7 @@ ssh "$host" 'set -e
     fi'
 
 scp -q "$1" "$host:$remote.new"
-restarts=$(ssh "$host" "mv $remote.new $remote && systemctl show xochitl -p NRestarts --value && systemctl restart xochitl")
+ssh "$host" "mv $remote.new $remote && systemctl restart xochitl"
 echo "Installed $name, restarted xochitl, waiting for it to settle"
 sleep 35
 
@@ -35,8 +35,9 @@ status=$(ssh "$host" '
     pid=$(pidof xochitl) || { echo down; exit; }
     tr "\0" "\n" < /proc/$pid/environ | grep -q "^LD_PRELOAD=.*xovi" || { echo stock; exit; }
     echo "up $(systemctl show xochitl -p NRestarts --value)"')
+# A manual restart resets xochitl's restart counter, so any crash since shows up
 case "$status" in
-up\ "$restarts")
+"up 0")
     echo "xochitl is up with $name"
     ssh "$host" "journalctl -u xochitl --since -60s --no-pager -o cat | grep -i '\[${name%.so}\]' | tail -n 5"
     ;;
