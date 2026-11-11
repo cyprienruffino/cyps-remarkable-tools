@@ -40,8 +40,8 @@ creates an AppLoad app with a QML frontend and a C++ backend, see its README.
 socket protocol, and shows the frontend at the Paper Pro Move's resolution
 (`--size pro` for the Paper Pro, or `WIDTHxHEIGHT`).
 
-For testing, `--tap X,Y` (repeatable) clicks before `--screenshot file.png`
-saves the window and quits; with `QT_QPA_PLATFORM=offscreen` it needs no
+For testing, `--tap X,Y` clicks and `--stroke X1,Y1:X2,Y2:...` drags like a
+pen (both repeatable) before `--screenshot file.png` saves the window and quits; with `QT_QPA_PLATFORM=offscreen` it needs no
 display:
 
 ```sh

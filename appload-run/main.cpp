@@ -239,6 +239,7 @@ int main(int argc, char *argv[])
     parser.addOption({ "screenshot", "Save a screenshot to <file> and quit.", "file" });
     parser.addOption({ "delay", "Milliseconds to wait before the taps and screenshot (default 2000).", "ms", "2000" });
     parser.addOption({ "tap", "Click at X,Y before the screenshot; repeatable, 400ms apart.", "x,y" });
+    parser.addOption({ "stroke", "Drag through X1,Y1:X2,Y2:... like a pen stroke; repeatable, run after the taps, 400ms apart.", "points" });
     parser.process(app);
 
     if (parser.positionalArguments().size() != 1) {
@@ -307,24 +308,44 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Simulated clicks, for testing without a tablet
-    const QStringList taps = parser.values("tap");
+    // Simulated clicks and pen strokes, for testing without a tablet. A tap is
+    // a stroke through a single point. xochitl delivers the pen as mouse events too.
+    QList<QList<QPointF>> strokes;
+    auto parsePoint = [](const QString &text) {
+        const QStringList xy = text.split(',');
+        return QPointF(xy.value(0).toDouble(), xy.value(1).toDouble());
+    };
+    for (const QString &tap : parser.values("tap")) {
+        strokes.append({ parsePoint(tap) });
+    }
+    for (const QString &stroke : parser.values("stroke")) {
+        QList<QPointF> points;
+        for (const QString &point : stroke.split(':')) {
+            points.append(parsePoint(point));
+        }
+        strokes.append(points);
+    }
     const int delay = parser.value("delay").toInt();
-    for (int i = 0; i < taps.size(); i++) {
-        const QStringList xy = taps[i].split(',');
-        const QPointF position(xy.value(0).toDouble(), xy.value(1).toDouble());
-        QTimer::singleShot(delay + i * 400, window, [window, position] {
-            for (const QEvent::Type type : { QEvent::MouseButtonPress, QEvent::MouseButtonRelease }) {
-                QMouseEvent event(type, position, window->mapToGlobal(position),
-                                  Qt::LeftButton, type == QEvent::MouseButtonPress ? Qt::LeftButton : Qt::NoButton, Qt::NoModifier);
+    for (int i = 0; i < strokes.size(); i++) {
+        QTimer::singleShot(delay + i * 400, window, [window, points = strokes[i]] {
+            auto send = [window](QEvent::Type type, QPointF position, Qt::MouseButtons buttons) {
+                QMouseEvent event(type, position, window->mapToGlobal(position), Qt::LeftButton, buttons, Qt::NoModifier);
                 QCoreApplication::sendEvent(window, &event);
+            };
+            send(QEvent::MouseButtonPress, points.first(), Qt::LeftButton);
+            // Interpolate so the app sees a continuous stroke
+            for (int p = 1; p < points.size(); p++) {
+                for (int step = 1; step <= 8; step++) {
+                    send(QEvent::MouseMove, points[p - 1] + (points[p] - points[p - 1]) * step / 8, Qt::LeftButton);
+                }
             }
+            send(QEvent::MouseButtonRelease, points.last(), Qt::NoButton);
         });
     }
 
     if (parser.isSet("screenshot")) {
         const QString path = parser.value("screenshot");
-        QTimer::singleShot(delay + taps.size() * 400 + 500, window, [window, path] {
+        QTimer::singleShot(delay + strokes.size() * 400 + 1500, window, [window, path] {
             if (!window->grabWindow().save(path)) {
                 qWarning("appload-run: can't save %s", qPrintable(path));
             }
