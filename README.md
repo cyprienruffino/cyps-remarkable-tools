@@ -55,9 +55,11 @@ To use it from a project's own flake, take
 
 Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
 
-- `rm-deploy [--no-restart] <app directory>` installs an AppLoad app directory
-  as `/home/root/xovi/exthome/appload/<directory name>` and restarts xochitl.
-  It works while the app's backend is running.
+- `rm-deploy [--restart] <app directory>` installs an AppLoad app directory
+  as `/home/root/xovi/exthome/appload/<directory name>`. It works while the
+  app is open, which then needs reopening; new apps show up after tapping
+  Reload in AppLoad's menu. It doesn't restart xochitl unless asked to:
+  restarting it while an AppLoad app is open can crash it.
 - `rm-logs [pattern]` follows xochitl's logs, where AppLoad and its apps log,
   optionally filtered.
 - `rm-screenshot [output.png]` takes a screenshot of the tablet and copies it
