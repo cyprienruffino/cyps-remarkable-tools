@@ -17,7 +17,7 @@
         # symbols resolve against the Qt xochitl has loaded.
         rm-sdk-extension = pkgs.pkgsCross.aarch64-multiplatform.stdenv.mkDerivation {
           pname = "rm-sdk-extension";
-          version = "0.3.0";
+          version = "0.4.0";
           src = ./xovi/rm-sdk;
           # Don't embed Nix store library paths
           NIX_DONT_SET_RPATH_aarch64_unknown_linux_gnu = 1;

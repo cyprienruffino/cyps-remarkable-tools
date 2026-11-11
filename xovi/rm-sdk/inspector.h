@@ -6,6 +6,7 @@
 #include <QMetaProperty>
 #include <QObject>
 #include <QStringList>
+#include <QVariant>
 
 // Describes any QObject from QML, using Qt's own metadata: its classes, and
 // their properties, methods and signals with full signatures. For finding out
@@ -41,6 +42,36 @@ public:
                     : method.methodType() == QMetaMethod::Slot ? "slot" : "method";
                 lines << QStringLiteral("  %1 %2 %3").arg(QString::fromLatin1(kind),
                     QString::fromLatin1(method.typeName()), QString::fromLatin1(method.methodSignature()));
+            }
+        }
+        return lines.join(QLatin1Char('\n'));
+    }
+
+    // Describes a value type (Q_GADGET) held in a QVariant, like xochitl's Line,
+    // which QML only shows as a string
+    Q_INVOKABLE QString describeValue(const QVariant &value) const
+    {
+        const QMetaObject *meta = value.metaType().metaObject();
+        QStringList lines;
+        lines << QStringLiteral("value of type %1").arg(QString::fromLatin1(value.metaType().name()));
+        if (!meta) {
+            lines << QStringLiteral("  (no meta object)");
+            return lines.join(QLatin1Char('\n'));
+        }
+        for (; meta; meta = meta->superClass()) {
+            lines << QStringLiteral("class %1").arg(QString::fromLatin1(meta->className()));
+            for (int i = meta->propertyOffset(); i < meta->propertyCount(); i++) {
+                const QMetaProperty property = meta->property(i);
+                lines << QStringLiteral("  property %1 %2").arg(QString::fromLatin1(property.typeName()),
+                    QString::fromLatin1(property.name()));
+            }
+            for (int i = meta->methodOffset(); i < meta->methodCount(); i++) {
+                const QMetaMethod method = meta->method(i);
+                lines << QStringLiteral("  method %1 %2").arg(QString::fromLatin1(method.typeName()),
+                    QString::fromLatin1(method.methodSignature()));
+            }
+            for (int i = meta->enumeratorOffset(); i < meta->enumeratorCount(); i++) {
+                lines << QStringLiteral("  enum %1").arg(QString::fromLatin1(meta->enumerator(i).name()));
             }
         }
         return lines.join(QLatin1Char('\n'));

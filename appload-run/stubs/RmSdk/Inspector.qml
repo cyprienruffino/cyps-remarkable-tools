@@ -5,4 +5,5 @@ import QtQuick
 
 QtObject {
     function describe(object) { return "Inspector is only available on the tablet, with the rm-sdk extension" }
+    function describeValue(value) { return describe(value) }
 }
