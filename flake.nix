@@ -12,6 +12,14 @@
     in
     {
       packages = forAllSystems (pkgs: {
+        appload-run = pkgs.stdenv.mkDerivation {
+          pname = "appload-run";
+          version = "0.1.0";
+          src = ./appload-run;
+          nativeBuildInputs = [ pkgs.cmake pkgs.ninja pkgs.qt6.wrapQtAppsHook ];
+          buildInputs = [ pkgs.qt6.qtbase pkgs.qt6.qtdeclarative ];
+          meta.mainProgram = "appload-run";
+        };
         rm-deploy = pkgs.writeShellApplication {
           name = "rm-deploy";
           runtimeInputs = [ pkgs.openssh pkgs.gnutar ];
@@ -26,6 +34,12 @@
           excludeShellChecks = [ "SC2029" ];
         };
       });
+
+      templates.appload = {
+        path = ./templates/appload;
+        description = "AppLoad application with a QML frontend and a C++ backend";
+      };
+      templates.default = self.templates.appload;
 
       devShells = forAllSystems (pkgs:
         let
@@ -42,6 +56,7 @@
               # rcc, qml and qmltestrunner, for AppLoad frontends
               pkgs.qt6.qtbase
               pkgs.qt6.qtdeclarative
+              self.packages.${pkgs.stdenv.hostPlatform.system}.appload-run
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-deploy
               self.packages.${pkgs.stdenv.hostPlatform.system}.rm-logs
             ];

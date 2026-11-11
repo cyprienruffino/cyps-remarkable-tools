@@ -22,7 +22,31 @@ It provides:
 - `rcc`, `qml` and `qmltestrunner` (Qt 6), to pack, preview and test AppLoad
   QML frontends on a PC.
 - `cmake`, `ninja`, `pkg-config` and `python3`.
-- `rm-deploy` and `rm-logs`, below.
+- `appload-run`, `rm-deploy` and `rm-logs`, below.
+
+## Starting an app
+
+```sh
+nix flake init -t github:cyprienruffino/remarkable-sdk
+```
+
+creates an AppLoad app with a QML frontend and a C++ backend, see its README.
+`backend/appload.h` is a header-only client for AppLoad's backend protocol.
+
+## Running apps on a PC
+
+`appload-run <app directory>` stands in for AppLoad: it provides the
+`net.asivery.AppLoad` QML module, starts the app's real backend over the same
+socket protocol, and shows the frontend at the Paper Pro Move's resolution
+(`--size pro` for the Paper Pro, or `WIDTHxHEIGHT`).
+
+For testing, `--tap X,Y` (repeatable) clicks before `--screenshot file.png`
+saves the window and quits; with `QT_QPA_PLATFORM=offscreen` it needs no
+display:
+
+```sh
+QT_QPA_PLATFORM=offscreen appload-run --tap 477,890 --screenshot shot.png dist-pc/myapp
+```
 
 To use it from a project's own flake, take
 `inputs.remarkable-sdk.devShells.${system}.default`.
