@@ -1,7 +1,8 @@
-# nix-remarkable-sdk
+# cyps-remarkable-sdk
 
-Nix flake for developing apps for the reMarkable Paper Pro family (Paper Pro,
+SDK for developing apps for the reMarkable Paper Pro family (Paper Pro,
 Paper Pro Move), mainly [AppLoad](https://github.com/asivery/rm-appload) apps.
+Enabled by a Nix flake
 
 ## Dev shell
 
