@@ -1,0 +1,8 @@
+{
+    "id": "ink-probe",
+    "name": "Ink probe",
+    "entry": "/ui/main.qml",
+    "loadsBackend": false,
+    "canHaveMultipleFrontends": false,
+    "supportsScaling": true
+}

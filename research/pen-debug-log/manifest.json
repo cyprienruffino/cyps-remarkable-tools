@@ -1,0 +1,8 @@
+{
+    "id": "pen-debug-log",
+    "name": "Pen debug log",
+    "entry": "/ui/main.qml",
+    "loadsBackend": false,
+    "canHaveMultipleFrontends": false,
+    "supportsScaling": true
+}
