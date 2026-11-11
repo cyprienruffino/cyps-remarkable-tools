@@ -1,4 +1,4 @@
-# remarkable-sdk
+# nix-remarkable-sdk
 
 Nix flake for developing apps for the reMarkable Paper Pro family (Paper Pro,
 Paper Pro Move), mainly [AppLoad](https://github.com/asivery/rm-appload) apps.
@@ -6,7 +6,7 @@ Paper Pro Move), mainly [AppLoad](https://github.com/asivery/rm-appload) apps.
 ## Dev shell
 
 ```sh
-nix develop github:cyprienruffino/remarkable-sdk
+nix develop github:cyprienruffino/nix-remarkable-sdk
 ```
 
 It provides:
@@ -27,7 +27,7 @@ It provides:
 ## Starting an app
 
 ```sh
-nix flake init -t github:cyprienruffino/remarkable-sdk
+nix flake init -t github:cyprienruffino/nix-remarkable-sdk
 ```
 
 creates an AppLoad app with a QML frontend and a C++ backend, see its README.
@@ -64,5 +64,5 @@ Both use the `remarkable` ssh host, set `RM_HOST` to use another one.
 They're also available without the dev shell:
 
 ```sh
-nix run github:cyprienruffino/remarkable-sdk#rm-deploy -- dist/myapp
+nix run github:cyprienruffino/nix-remarkable-sdk#rm-deploy -- dist/myapp
 ```
