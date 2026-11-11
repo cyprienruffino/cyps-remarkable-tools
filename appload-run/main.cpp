@@ -18,6 +18,7 @@
 #include <QQuickWindow>
 #include <QResource>
 #include <QSocketNotifier>
+#include <QTest>
 #include <QTimer>
 
 #include <sys/socket.h>
@@ -228,6 +229,11 @@ int main(int argc, char *argv[])
     if (qEnvironmentVariableIsEmpty("QT_FORCE_STDERR_LOGGING")) {
         qputenv("QT_FORCE_STDERR_LOGGING", "1");
     }
+    // Qt's QML disk cache doesn't notice files changing inside a rebuilt
+    // resources.rcc, and would keep running the old frontend
+    if (qEnvironmentVariableIsEmpty("QML_DISABLE_DISK_CACHE")) {
+        qputenv("QML_DISABLE_DISK_CACHE", "1");
+    }
     QGuiApplication app(argc, argv);
     app.setApplicationName("appload-run");
 
@@ -328,18 +334,15 @@ int main(int argc, char *argv[])
     const int delay = parser.value("delay").toInt();
     for (int i = 0; i < strokes.size(); i++) {
         QTimer::singleShot(delay + i * 400, window, [window, points = strokes[i]] {
-            auto send = [window](QEvent::Type type, QPointF position, Qt::MouseButtons buttons) {
-                QMouseEvent event(type, position, window->mapToGlobal(position), Qt::LeftButton, buttons, Qt::NoModifier);
-                QCoreApplication::sendEvent(window, &event);
-            };
-            send(QEvent::MouseButtonPress, points.first(), Qt::LeftButton);
+            auto at = [](QPointF point) { return point.toPoint(); };
+            QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, at(points.first()));
             // Interpolate so the app sees a continuous stroke
             for (int p = 1; p < points.size(); p++) {
                 for (int step = 1; step <= 8; step++) {
-                    send(QEvent::MouseMove, points[p - 1] + (points[p] - points[p - 1]) * step / 8, Qt::LeftButton);
+                    QTest::mouseMove(window, at(points[p - 1] + (points[p] - points[p - 1]) * step / 8), 5);
                 }
             }
-            send(QEvent::MouseButtonRelease, points.last(), Qt::NoButton);
+            QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, at(points.last()), 5);
         });
     }
 
