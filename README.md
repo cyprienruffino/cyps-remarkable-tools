@@ -1,6 +1,6 @@
-# cyps-remarkable-sdk
+# cyps-remarkable-tools
 
-SDK for developing apps for the reMarkable Paper Pro family (Paper Pro,
+Tools and libs for developing apps for the reMarkable Paper Pro family (Paper Pro,
 Paper Pro Move), mainly [AppLoad](https://github.com/asivery/rm-appload) apps.
 Enabled by a Nix flake
 
